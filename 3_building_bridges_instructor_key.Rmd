@@ -1,0 +1,163 @@
+---
+title: "Building Bridges"
+author: "Instructor Key"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Building bridges
+
+Access the bridge data here: [google sheet](#INSTRUCTORS - ADD IN URL OF GOOGLE SPREADSHEET HERE, INSIDE THESE PARENTHESES)
+
+You'll work with a .csv data file from multiple lab sections. The first part of the assignment will involve analyzing data from *only your lab section*.
+
+Who else was in your group?
+
+*your response here*
+
+Start by reading in your data:
+```{r, eval=FALSE}
+
+# Read in your data
+df <- read.csv("filename") # Replace filename with the name of your file
+
+# Subset to get the data from your lab section
+# IN OUR SPREADSHEET, THAT COLUMN WAS day_time
+# Replace labsection with the name of your section (day_time)
+df_lab <- subset(df, day_time == "labsection") 
+
+```
+
+## Prediction 1: Fitness varies among individuals
+## Prediction 2: Average fitness increases from one generation to the next
+## Prediction 3: There is a trade-off beween bridge length and load score
+## Prediction 4: Structural complexity increases from one generation to the next 
+
+Let's visualize these data in a way that lets us track how each group's bridge changed across generations (like ancestors & decendants!):
+```{r, eval=F}
+
+# Plot generation time by fitness
+plot(df_lab$generation, df_lab$fitness)
+
+# Subset the lab data to isolate the bridges for each group
+# replace teamname with one of the team names from your section
+team1 <- subset(df_lab, team_name == "teamname") 
+# repeat with the other teams in your section (e.g. team2, team3)
+team2 <- subset(df_lab, team_name == "teamname2")
+team3 <- subset(df_lab, team_name == "teamname3")
+team4 <- subset(df_lab, team_name == "teamname4")
+
+# Plot each team individually on the same graph
+plot(df_lab$generation, df_lab$fitness, type="n")
+lines(team1$generation, team1$fitness, col="blue")
+
+# repeat with the other teams in your section (e.g. team2, team3)
+lines(team2$generation, team2$fitness, col="red")
+lines(team3$generation, team3$fitness, col="black")
+lines(team4$generation, team4$fitness, col="green")
+
+```
+
+Interpret this figure - is there variation in fitness among bridges? Does fitness seem to increase across generations?
+
+*your response here*
+
+It may be easier to see overall trends by creating a boxplot to show changes in fitness across generations. Boxplots are great because they show us more about the data's distribution (i.e., median and quartiles) than we can see with a scatterplot.
+
+Evaluate Prediction 1 AND Prediction 2 using your lab section's Building Bridges data:
+```{r, eval=F}
+
+# Plot fitness for each generation as a boxplot
+boxplot(df_lab$fitness ~ df_lab$generation, xlab="Generation", ylab="Fitness")
+
+```
+
+Prediction 1: Was your intial prediction supported?
+
+*your figure results and evidence-based claim here*
+
+Prediction 2: Was your intial prediction supported?
+
+*your figure results and evidence-based claim here*
+
+Create a scatterplot to determine whether a tradeoff exists between load score and length and overlay a linear regression line:
+```{r, eval=F}
+
+# Run a linear model
+bridge_mod <- lm(score ~ length_cm, data=df_lab)
+
+# Find the slope of the line
+summary(bridge_mod)
+
+# Add linear regression line to the plot
+plot(length_cm ~ score, data=df_lab)
+abline(bridge_mod)
+
+```
+
+Interpret this figure and evaluate prediction 3: Was your intial prediction supported?
+
+*your response here*
+
+## Calculate structural complexity of bridges and compare across generations
+The Shannon Index of diversity considers how many different resources were used to build each bridge AND how evenly they were used (e.g., if 90% of the resources used were paper cups, that would not represent an even use of resources). Before running the code below, install the package vegan (install.packages("vegan")) in the R console.
+
+Calculate the Shannon Index for the building bridges data:
+```{r, eval=F}
+
+# Modify the code below as needed to exactly match the data sheet
+materials_lab <- subset(df_lab, select = c("paper", "paper_clips", "sticky_pads", 
+                                           "rubber_bands","straws", "cups","bowls",
+                                           "plates","labels","knife"))
+
+# Load the vegan package
+library("vegan")
+
+# Calculate the shannon index using the diversity function
+shannon <- diversity(materials_lab, index="shannon")
+
+# Add the results from the shannon index as a new column in df_lab
+df_lab$shannon
+
+```
+
+Great! Now you've got Shannon diversity for each bridge in your lab section. Visualize how this changes across generations using a boxplot, like above:
+```{r, eval=F}
+
+# Plot shannon index for each generation
+boxplot(df_lab$shannon ~ df_lab$generation,
+        xlab="Generation", ylab="Shannon Index")
+
+```
+
+Interpret this figure and evaluate prediction 4: Does complexity increase or decrease across time?
+
+*your response here* 
+
+## Self-assessment of group collaboration
+Assess whether everyone played a role or whether the contributions were very unbalanced. Give your overall impression of your individual ability to contribute in positive ways towards your group’s bridge.
+
+*your response here* 
+
+# Bonus section! Evolution is not uniform across populations...explore this for yourself by comparing results from your lab section to other lab sections.
+```{r, eval=F}
+
+# Subset data to get another lab section's data
+# Replace labsection with the name of another section
+df_lab2 <- subset(df, day_time == "labsection")  
+
+# Use a boxplot to look at how fitness changed across generations in that lab, 
+boxplot(df_lab2$fitness ~ df_lab2$generation, xlab="Generation", ylab="Fitness")
+
+# or see if they saw a trade-off in length vs. load of the bridges. 
+# Compare their results to your results from this lab section!
+
+bridge_mod2 <- lm(score ~ length_cm, data=df_lab2)
+summary(bridge_mod2)
+plot(length_cm ~ score, data=df_lab2)
+abline(bridge_mod2)
+
+```
+
+*Your comparison of results across lab sections here*
